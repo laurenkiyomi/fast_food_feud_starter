@@ -6,6 +6,10 @@ import Header from "./components/Header/Header"
 import Instructions from "./components/Instructions/Instructions"
 import Chip from "./components/Chip/Chip"
 import NutritionalLabel from "./components/NutritionalLabel/NutritionalLabel"
+import CategoriesColumn from "./components/CategoriesColumn"
+import RestaurantsRow from "./components/RestaurantsRow"
+import MenuDisplay from "./components/MenuDisplay"
+import DataSource from "./components/DataSource"
 
 // don't move this!
 export const appInfo = {
@@ -25,6 +29,7 @@ export const appInfo = {
 const { data, categories, restaurants } = createDataSet()
 
 export function App() {
+  // constants!
   const [selectedCategory, setCategory] = React.useState("")
   const [selectedRestaurant, setRestaurant] = React.useState("")
   const [selectedMenuItem, setMenuItem] = React.useState(null)
@@ -36,7 +41,7 @@ export function App() {
     
 
   const selectCategory = (category) => {
-    if (selectedCategory == "" && selectedRestaurant == "") {
+    if (selectedRestaurant === "") {
       setInstruction(appInfo.instructions.onlyCategory)
     }
 
@@ -49,7 +54,7 @@ export function App() {
   }
 
   const selectRestaurant = (restaurant) => {
-    if (selectedCategory == "" && selectedRestaurant == "") {
+    if (selectedCategory === "") {
       setInstruction(appInfo.instructions.onlyRestaurant)
     }
 
@@ -65,58 +70,46 @@ export function App() {
     setMenuItem(menuItem)
   }
 
+  const deselectMenuItem = () => {
+    setInstruction(appInfo.instructions.noSelectedItem)
+    setMenuItem(null)
+  }
+
+  const deselectRestaurant = () => {
+    deselectMenuItem()
+    if (selectedCategory === "") {
+      setInstruction(appInfo.instructions.start)
+    }
+
+    else {
+      setInstruction(appInfo.instructions.noSelectedItem)
+    }
+
+    setRestaurant("")
+  }
+
+  const deselectCategory = () => {
+    deselectMenuItem()
+    if (selectedRestaurant === "") {
+      setInstruction(appInfo.instructions.start)
+    }
+
+    else {
+      setInstruction(appInfo.instructions.noSelectedItem)
+    }
+
+    setCategory("")
+  }
+
   return (
     <main className="App">
-      {/* CATEGORIES COLUMN */}
-      <div className="CategoriesColumn col">
-        <div className="categories options">
-          <h2 className="title">Categories</h2>
-          {categories.map((category) => {
-            return(
-            <Chip key={category} label={category} onClick={() => selectCategory(category)}
-            isActive = {selectedCategory === category}/>)
-          })}
-        </div>
-      </div>
-
-      {/* MAIN COLUMN */}
+      <CategoriesColumn selectCategory={selectCategory} categories={categories} selectedCategory={selectedCategory}/>
       <div className="container">
-        {/* HEADER GOES HERE */}
         <Header title={appInfo.title} tagline={appInfo.tagline} description={appInfo.description}/>
-        {/* RESTAURANTS ROW */}
-        <div className="RestaurantsRow">
-          <h2 className="title">Restaurants</h2>
-          <div className="restaurants options">
-            {restaurants.map((restaurant) => {
-              return (
-            <Chip key={restaurant} label={restaurant} onClick={() => selectRestaurant(restaurant)}
-            isActive = {selectedRestaurant === restaurant}/>)
-            })}
-          </div>
-        </div>
-
-        {/* INSTRUCTIONS GO HERE */}
+        <RestaurantsRow selectRestaurant={selectRestaurant} restaurants={restaurants} selectedRestaurant={selectedRestaurant} />
         <Instructions instructions={instruction}/>
-        {/* MENU DISPLAY */}
-        <div className="MenuDisplay display">
-          <div className="MenuItemButtons menu-items">
-            <h2 className="title">Menu Items</h2>
-            {currentMenuItems.map((menuItem) => {
-              return (
-                <Chip key={menuItem.item_name} label={menuItem.item_name} onClick={() => selectMenuItem(menuItem)}
-                isActive = {selectedMenuItem === menuItem}/>)
-            })}  
-          </div>
-
-          {/* NUTRITION FACTS */}
-          <div className="NutritionFacts nutrition-facts">
-           {selectedMenuItem ? <NutritionalLabel item={selectedMenuItem}/> : null}
-          </div>
-        </div>
-
-        <div className="data-sources">
-          <p>{appInfo.dataSource}</p>
-        </div>
+        <MenuDisplay selectMenuItem={selectMenuItem} currentMenuItems={currentMenuItems} selectedMenuItem={selectedMenuItem}/>
+        <DataSource appInfo={appInfo}/>
       </div>
     </main>
   )
